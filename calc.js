@@ -5,54 +5,84 @@ let operator = "";
 const display = document.getElementById("display");
 
 function calculate() {
-    if (curr === "" || operator === "") return;
+    if (total === "" || curr === "" || operator === "") return;
+
+    const num1 = Number(total);
+    const num2 = Number(curr);
+
     switch (operator) {
         case "+":
-            total = Number(total) + Number(curr);
-            break; 
-            
+            total = num1 + num2;
+            break;
+
         case "-":
-            total = Number(total) - Number(curr);
+            total = num1 - num2;
             break;
-            
+
         case "*":
-            total = Number(total) * Number(curr); 
+            total = num1 * num2;
             break;
-            
+
         case "/":
-            total = Number(total) / Number(curr);
+            if (num2 === 0) {
+                display.value = "Error";
+                clearAll();
+                return;
+            }
+            total = num1 / num2;
             break;
-            
+
         case "%":
-            total = Number(total) % Number(curr);
-            break; 
-        }
-        
-        total = total.toString(); 
-        curr = ""; 
+            total = num1 % num2;
+            break;
     }
-    
+
+    total = total.toString();
+    curr = "";
+}
+
 function appendNumber(num) {
+
+    if (num === "." && curr.includes(".")) {
+        return;
+    }
+
     curr += num;
     display.value += num;
 }
 
-
 function setOperator(op) {
 
-    if (curr === "") return;
+    if (curr === "" && total === "") return;
 
-    if (operator !== "") {
-        calculate();
-    } else {
-        total = curr;
+    // Replace previous operator instead of adding another
+    if (curr === "" && operator !== "") {
+        display.value =
+            display.value.slice(0, -1) + op;
+
+        operator = op;
+        return;
     }
 
-    curr = "";
+    if (total === "") {
+        total = curr;
+    } else if (operator !== "") {
+        calculate();
+    }
+
     operator = op;
-    display.value += op;
+    curr = "";
+
+    display.value = total + operator;
 }
 
+function clearAll() {
+    total = "";
+    curr = "";
+    operator = "";
+}
+
+/* Numbers */
 const buttons = document.querySelectorAll(".btn");
 
 let btn7 =document.getElementById("btn7");
@@ -128,91 +158,59 @@ btnDot.addEventListener("click", function () {
 });
 
 
-document.getElementById("btnAdd").addEventListener("click", function () {
-    
-    if (operator !== "") { 
-        calculate(); 
-    } 
-    else {
-         total = curr; 
-         curr = "";
-    } 
-    operator = "+"; 
-    display.value += "+"; 
-}); 
+/* Operators */
 
-document.getElementById("btnSub").addEventListener("click", function () { 
-    if (operator !== "") { 
-        calculate(); 
-    } 
-    else {
-         total = curr; 
-         curr = "";
-    } 
-    operator = "-"; 
-    display.value += "-"; 
-}); 
+document.getElementById("btnAdd").onclick =
+    () => setOperator("+");
 
-document.getElementById("btnMul").addEventListener("click", function () { 
-    if (operator !== "") { 
-        calculate(); 
-    } 
-    else {
-         total = curr; 
-         curr = "";
-    } 
-    operator = "*"; 
-    display.value += "*"; 
-});
+document.getElementById("btnSub").onclick =
+    () => setOperator("-");
 
-// Divide 
-document.getElementById("divide").addEventListener("click", function () { 
-    if (operator !== "") { 
-        calculate(); 
-    } else { 
-        total = curr; 
-        curr = ""; 
-    } 
-    operator = "/"; 
-    display.value += "/"; 
-}); 
+document.getElementById("btnMul").onclick =
+    () => setOperator("*");
 
-// Modulo 
-document.getElementById("modulo").addEventListener("click", function () { 
-    if (operator !== "") { calculate(); 
-    } else { 
-        total = curr; 
-        curr = ""; 
-    } 
-    operator = "%"; 
-    display.value += "%"; 
-}); 
-    
-// Equal 
-document.getElementById("equal").addEventListener("click", function () { 
-    calculate(); 
-    display.value = total; 
-    curr = total.toString(); 
-    operator = ""; 
-});
- 
-// Delete 
- 
-document.getElementById("del").addEventListener("click", function () { 
-    display.value = display.value.slice(0, -1); 
-    if (curr.length > 0) { 
-        curr = curr.slice(0, -1); 
-    } 
-}); 
+document.getElementById("divide").onclick =
+    () => setOperator("/");
 
-// Clear 
- 
-document.getElementById("clear").addEventListener("click", function () { 
-    display.value = ""; 
-    total = ""; 
-    curr = ""; 
-    operator = ""; 
-});
+document.getElementById("modulo").onclick =
+    () => setOperator("%");
 
+/* Equal */
 
+document.getElementById("equal").onclick = () => {
 
+    calculate();
+
+    display.value = total;
+
+    curr = total.toString();
+    operator = "";
+};
+
+/* Delete */
+
+document.getElementById("del").onclick = () => {
+
+    if (display.value === "") return;
+
+    const lastChar =
+        display.value[display.value.length - 1];
+
+    display.value =
+        display.value.slice(0, -1);
+
+    if ("+-*/%".includes(lastChar)) {
+        operator = "";
+    } else {
+        curr = curr.slice(0, -1);
+    }
+};
+
+/* Clear */
+
+document.getElementById("clear").onclick = () => {
+
+    display.value = "";
+
+    clearAll();
+};
